@@ -102,32 +102,49 @@ fn main() {
 mod tests {
     use super::*;
 
+    static TEST_FILE: &str = "resources/test.csv";
+    static TEST_FILE_WRONG: &str = "resources/tests.csv";
+
+    #[allow(unused_macros)]
+    macro_rules! SETUP_TEAMBUILDER_TEST {
+        ($file:expr, $path:ident, $tb:ident) => {
+            let $path = Path::new($file);
+            let mut $tb = TeamBuilder::load_file(&$path).expect("File not found");
+        };
+    }
+
+    #[allow(unused_macros)]
+    macro_rules! SETUP_TEAMBUILDER_TEST_AND_INIT {
+        ($file:expr, $path:ident, $tb:ident) => {
+            SETUP_TEAMBUILDER_TEST!($file, $path, $tb);
+            $tb.process_file().expect("Cannot process file");
+        };
+    }
+
     #[test]
     fn test_load_csv_correct_path() {
-        let path = Path::new("resources/test.csv");
-        let tb = TeamBuilder::load_file(&path).expect("File not found");
+        SETUP_TEAMBUILDER_TEST!(TEST_FILE, path, tb);
         assert!(tb.students_file.len() > 0);
     }
 
     #[test]
     #[should_panic]
     fn test_load_csv_wrong_path() {
-        let path = Path::new("resources/cross.csv");
-        let tb = TeamBuilder::load_file(&path).expect("File not found");
+        SETUP_TEAMBUILDER_TEST!(TEST_FILE_WRONG, path, tb);
         assert!(tb.students_file.len() > 0);
     }
 
     #[test]
     fn test_load_csv_valid_content() {
-        let path = Path::new("resources/cross.csv");
-        let mut tb = TeamBuilder::load_file(&path).expect("File not found");
-        tb.process_file().expect("Cannot process file");
+        SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE, path, tb);
         assert!(tb.students.len() > 0);
     }
 
     #[test]
+    #[should_panic]
     fn test_load_csv_not_valid_content() {
-        unimplemented!();
+        SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_WRONG, path, tb);
+        assert!(tb.students.len() > 0);
     }
 
     #[test]
