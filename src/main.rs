@@ -27,7 +27,7 @@ pub enum Skills {
     Teamwork,
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Team {
     pub students: Vec<Student>,
 }
@@ -104,6 +104,12 @@ impl TeamBuilder {
         Ok(())
     }
 
+    pub fn make_teams(&mut self, size_of_teams: usize) {
+        self.calculate_teams_skill_level();
+        self.sort_teams_by_skill_level();
+        self.assign_students_to_team(size_of_teams);
+    }
+
     fn check_number_of_teams(&self, students_per_team: usize) -> Option<(usize, usize)> {
         if students_per_team >= self.students.len() {
             return None;
@@ -122,9 +128,10 @@ impl TeamBuilder {
     }
 
     fn sort_teams_by_skill_level(&mut self) {
+        // Order from lowest to greatest
         self.students.sort_by(|a, b| {
-            b.average_skill_level
-                .partial_cmp(&a.average_skill_level)
+            a.average_skill_level
+                .partial_cmp(&b.average_skill_level)
                 .unwrap()
         });
     }
@@ -152,9 +159,19 @@ impl TeamBuilder {
 }
 
 fn main() {
-    let path = Path::new("resources/test.csv");
+    let path = Path::new("resources/test_uneven.csv");
     let mut tb = TeamBuilder::load_file(&path).expect("File not found");
     tb.process_file().expect("Cannot process file");
+    tb.make_teams(2);
+
+    // for student in tb.students {
+    //     println!("Student: {:?}", student);
+    // }
+
+    for team in tb.teams.iter().map(|x| &x.students) {
+        let students: Vec<String> = team.iter().map(|x| x.surname.clone()).collect();
+        println!("Team: {:?}", students);
+    }
 }
 
 #[cfg(test)]
