@@ -1,0 +1,10 @@
+[package]
+name = "team-builder"
+version = "0.1.0"
+authors = ["Giorgio Pomettini <giorgio.freespire@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+csv = ">=1"
+serde = ">=1.0.91"
+serde_derive = ">=1.0.92"
