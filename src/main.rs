@@ -1,6 +1,9 @@
 extern crate csv;
 #[macro_use]
 extern crate serde_derive;
+extern crate strum;
+#[macro_use]
+extern crate strum_macros;
 
 use csv::{Reader, ReaderBuilder};
 use std::cmp::Eq;
@@ -9,7 +12,10 @@ use std::collections::HashSet;
 use std::fs::*;
 use std::path::Path;
 
-macro_rules! ADD_STUDENT {
+use strum::IntoEnumIterator;
+use strum_macros::{Display, EnumIter};
+
+macro_rules! add_student {
     ($student:expr, $record:expr, $skill:expr, $id:expr) => {
         $student
             .skills
@@ -17,14 +23,14 @@ macro_rules! ADD_STUDENT {
     };
 }
 
-#[derive(Debug, Eq, PartialEq, Hash, Clone)]
+#[derive(Debug, Eq, PartialEq, Hash, Clone, EnumIter, Copy)]
 pub enum Skills {
-    GameDesign,
-    LevelDesign,
-    Programming,
-    Narrative,
-    Graphics,
-    Teamwork,
+    GameDesign = 1,
+    LevelDesign = 2,
+    Programming = 3,
+    Narrative = 4,
+    Graphics = 5,
+    Teamwork = 6,
 }
 
 #[derive(Default, Debug)]
@@ -88,13 +94,9 @@ impl TeamBuilder {
 
             student.surname = record[0].to_string();
 
-            // TODO: Must refactor
-            ADD_STUDENT!(student, record, Skills::GameDesign, 1);
-            ADD_STUDENT!(student, record, Skills::LevelDesign, 2);
-            ADD_STUDENT!(student, record, Skills::Programming, 3);
-            ADD_STUDENT!(student, record, Skills::Narrative, 4);
-            ADD_STUDENT!(student, record, Skills::Graphics, 5);
-            ADD_STUDENT!(student, record, Skills::Teamwork, 6);
+            for skill in Skills::iter() {
+                add_student!(student, record, skill, skill as usize);
+            }
 
             students.push(student);
         }
@@ -104,11 +106,11 @@ impl TeamBuilder {
         Ok(())
     }
 
-    pub fn make_teams(&mut self, size_of_teams: usize) {
-        self.calculate_teams_skill_level();
-        self.sort_teams_by_skill_level();
-        self.assign_students_to_team(size_of_teams);
-    }
+    // pub fn make_teams(&mut self, size_of_teams: usize) {
+    //     self.calculate_teams_skill_level();
+    //     self.sort_teams_by_skill_level();
+    //     self.assign_students_to_team(size_of_teams);
+    // }
 
     fn check_number_of_teams(&self, students_per_team: usize) -> Option<(usize, usize)> {
         if students_per_team >= self.students.len() {
@@ -159,10 +161,12 @@ impl TeamBuilder {
 }
 
 fn main() {
-    let path = Path::new("resources/test_uneven.csv");
+    let path = Path::new("resources/students.csv");
     let mut tb = TeamBuilder::load_file(&path).expect("File not found");
     tb.process_file().expect("Cannot process file");
-    tb.make_teams(2);
+    tb.calculate_teams_skill_level();
+    tb.sort_teams_by_skill_level();
+    tb.assign_students_to_team(2);
 
     // for student in tb.students {
     //     println!("Student: {:?}", student);
@@ -321,7 +325,7 @@ mod tests {
         tb.calculate_teams_skill_level();
         tb.sort_teams_by_skill_level();
 
-        assert_eq!(tb.students.first().unwrap().surname, "Bonanni");
+        assert_eq!(tb.students.last().unwrap().surname, "Bonanni");
     }
 
     #[test]
@@ -332,7 +336,7 @@ mod tests {
         tb.calculate_teams_skill_level();
         tb.sort_teams_by_skill_level();
 
-        assert_eq!(tb.students.first().unwrap().surname, "Pomettini");
+        assert_eq!(tb.students.last().unwrap().surname, "Pomettini");
     }
 
     #[test]
@@ -342,7 +346,7 @@ mod tests {
         tb.calculate_teams_skill_level();
         tb.sort_teams_by_skill_level();
 
-        assert_eq!(tb.students.last().unwrap().surname, "Reclus");
+        assert_eq!(tb.students.first().unwrap().surname, "Reclus");
     }
 
     #[test]
@@ -353,7 +357,7 @@ mod tests {
         tb.calculate_teams_skill_level();
         tb.sort_teams_by_skill_level();
 
-        assert_eq!(tb.students.last().unwrap().surname, "Pomettini");
+        assert_eq!(tb.students.first().unwrap().surname, "Pomettini");
     }
 
     #[test]
@@ -377,8 +381,8 @@ mod tests {
             .collect();
 
         assert_eq!(tb.teams.len(), 2);
-        assert_eq!(first_team, vec!["Reclus", "Pomettini", "Ricchiuti"]);
-        assert_eq!(second_team, vec!["Leotta", "De Dominicis", "Bonanni"]);
+        assert_eq!(first_team, vec!["Bonanni", "De Dominicis", "Leotta"]);
+        assert_eq!(second_team, vec!["Ricchiuti", "Pomettini", "Reclus"]);
     }
 
     #[test]
@@ -402,7 +406,7 @@ mod tests {
             .collect();
 
         assert_eq!(tb.teams.len(), 2);
-        assert_eq!(first_team, vec!["Leotta", "De Dominicis", "Bonanni"]);
-        assert_eq!(second_team, vec!["Pomettini", "Ricchiuti"]);
+        assert_eq!(first_team, vec!["Bonanni", "De Dominicis", "Leotta"]);
+        assert_eq!(second_team, vec!["Ricchiuti", "Pomettini"]);
     }
 }
