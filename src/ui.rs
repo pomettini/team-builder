@@ -98,7 +98,6 @@ pub fn init_ui(tb: &mut TeamBuilder) {
     combo_box.clone().set_selected(&ui, 0);
     combo_box.clone().on_selected(&ui, {
         move |index| {
-            println!("{:?}", index);
             match index {
                 // TODO: Must refactor
                 0 => *sort_by.borrow_mut() = None,
