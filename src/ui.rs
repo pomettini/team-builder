@@ -9,22 +9,24 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 pub fn init_ui(tb: &mut TeamBuilder) {
+    // Wrapped with Interior Mutability Pattern
+    // Because I need to pass the state around between UI controls
     let sort_by: Rc<RefCell<Option<Skills>>> = Rc::new(RefCell::new(None));
 
     let ui = UI::init().expect("Couldn't initialize UI library");
-    let mut win = Window::new(&ui, "Team Builder", 640, 400, WindowType::NoMenubar);
+    let mut window = Window::new(&ui, "Team Builder", 640, 400, WindowType::NoMenubar);
 
-    let mut vbox = VerticalBox::new(&ui);
-    vbox.set_padded(&ui, true);
+    let mut program_vbox = VerticalBox::new(&ui);
+    program_vbox.set_padded(&ui, true);
 
-    let mut hbox = HorizontalBox::new(&ui);
-    hbox.set_padded(&ui, true);
+    let mut selectors_hbox = HorizontalBox::new(&ui);
+    selectors_hbox.set_padded(&ui, true);
 
     let team_number_label = Label::new(&ui, "Team members: 2");
     let mut team_number_slider = Slider::new(&ui, 2, 10);
 
-    hbox.append(&ui, team_number_label.clone(), LayoutStrategy::Compact);
-    hbox.append(&ui, team_number_slider.clone(), LayoutStrategy::Stretchy);
+    selectors_hbox.append(&ui, team_number_label.clone(), LayoutStrategy::Compact);
+    selectors_hbox.append(&ui, team_number_slider.clone(), LayoutStrategy::Stretchy);
 
     let mut students_labels: Vec<Label> = Vec::new();
 
@@ -32,6 +34,7 @@ pub fn init_ui(tb: &mut TeamBuilder) {
     students_group_vbox.set_padded(&ui, true);
 
     // TODO: Must refactor
+    // Creates two columns and five rows for the teams
     let mut counter = 0;
     for _ in 0..5 {
         let mut students_group_hbox = HorizontalBox::new(&ui);
@@ -47,6 +50,7 @@ pub fn init_ui(tb: &mut TeamBuilder) {
         students_group_vbox.append(&ui, students_group_hbox, LayoutStrategy::Stretchy);
     }
 
+    // Updates the number of teams based on slider's value
     team_number_slider.on_changed(&ui, {
         let ui = ui.clone();
         let mut team_number_label = team_number_label.clone();
@@ -62,6 +66,7 @@ pub fn init_ui(tb: &mut TeamBuilder) {
         let team_number_slider = team_number_slider.clone();
         let sort_by = sort_by.clone();
         move |_| {
+            // Do stuff with teams data
             tb.sort_teams_by_skill_level(*sort_by.borrow());
             tb.assign_students_to_team(team_number_slider.value(&ui) as usize);
 
@@ -70,6 +75,7 @@ pub fn init_ui(tb: &mut TeamBuilder) {
                 label.set_text(&ui, "");
             }
 
+            // Assigns the teams on each label
             let mut counter = 0;
             for team in tb.teams.iter().map(|team| &team.students) {
                 let surnames: Vec<String> =
@@ -83,20 +89,22 @@ pub fn init_ui(tb: &mut TeamBuilder) {
         }
     });
 
-    hbox.append(&ui, generate_button, LayoutStrategy::Stretchy);
-    vbox.append(&ui, hbox, LayoutStrategy::Compact);
+    selectors_hbox.append(&ui, generate_button, LayoutStrategy::Stretchy);
+    program_vbox.append(&ui, selectors_hbox, LayoutStrategy::Compact);
 
-    let combo_box = Combobox::new(&ui);
-    combo_box.append(&ui, "Sort by Average");
+    let sort_by_skill_cb = Combobox::new(&ui);
+    sort_by_skill_cb.append(&ui, "Sort by Average");
 
+    // Add each skill to the ComboBox
     for skill in Skills::iter() {
-        combo_box
+        sort_by_skill_cb
             .clone()
             .append(&ui, &format!("Sort by {:?}", skill));
     }
 
-    combo_box.clone().set_selected(&ui, 0);
-    combo_box.clone().on_selected(&ui, {
+    // Updates the value of the sorting variable
+    sort_by_skill_cb.clone().set_selected(&ui, 0);
+    sort_by_skill_cb.clone().on_selected(&ui, {
         move |index| {
             match index {
                 // TODO: Must refactor
@@ -112,10 +120,10 @@ pub fn init_ui(tb: &mut TeamBuilder) {
         }
     });
 
-    vbox.append(&ui, combo_box, LayoutStrategy::Compact);
-    vbox.append(&ui, students_group_vbox, LayoutStrategy::Compact);
+    program_vbox.append(&ui, sort_by_skill_cb, LayoutStrategy::Compact);
+    program_vbox.append(&ui, students_group_vbox, LayoutStrategy::Compact);
 
-    win.set_child(&ui, vbox);
-    win.show(&ui);
+    window.set_child(&ui, program_vbox);
+    window.show(&ui);
     ui.main();
 }
