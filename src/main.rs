@@ -1,34 +1,33 @@
+
 extern crate csv;
 #[macro_use]
 extern crate serde_derive;
 extern crate strum;
 #[macro_use]
 extern crate strum_macros;
-extern crate iui;
-extern crate itertools;
 
+extern crate itertools;
+extern crate iui;
 pub mod tests;
 
 // For some reasons rustfmt fucks up with use declarations
 
 #[rustfmt::skip]
-use csv::{Reader, ReaderBuilder};
+use csv::{ReaderBuilder};
 #[rustfmt::skip]
 use std::fs::*;
 #[rustfmt::skip]
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 #[rustfmt::skip]
 use std::path::Path;
 #[rustfmt::skip]
 use strum::IntoEnumIterator;
 #[rustfmt::skip]
-use strum_macros::{Display, EnumIter};
+use strum_macros::{EnumIter};
 #[rustfmt::skip]
 use iui::prelude::*;
 #[rustfmt::skip]
 use iui::controls::*;
-#[rustfmt::skip]
-use std::rc::Rc;
 #[rustfmt::skip]
 use itertools::Itertools;
 
@@ -178,8 +177,12 @@ fn main() {
     tb.calculate_teams_skill_level();
     tb.sort_teams_by_skill_level();
 
+    let team_names = vec![
+        "Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel", "India", "Juliett",
+    ];
+
     let ui = UI::init().expect("Couldn't initialize UI library");
-    let mut win = Window::new(&ui, "Team Builder", 640, 800, WindowType::NoMenubar);
+    let mut win = Window::new(&ui, "Team Builder", 640, 400, WindowType::NoMenubar);
 
     let mut vbox = VerticalBox::new(&ui);
     vbox.set_padded(&ui, true);
@@ -187,11 +190,32 @@ fn main() {
     let mut hbox = HorizontalBox::new(&ui);
     hbox.set_padded(&ui, true);
 
-    let mut team_number_label = Label::new(&ui, "Team members: 2");
+    let team_number_label = Label::new(&ui, "Team members: 2");
     let mut team_number_slider = Slider::new(&ui, 2, 10);
 
     hbox.append(&ui, team_number_label.clone(), LayoutStrategy::Compact);
     hbox.append(&ui, team_number_slider.clone(), LayoutStrategy::Stretchy);
+
+    let mut students_labels: Vec<Label> = Vec::new();
+
+    let mut students_group_vbox = VerticalBox::new(&ui);
+    students_group_vbox.set_padded(&ui, true);
+
+    // TODO: Must refactor
+    let mut counter = 0;
+    for _ in 0..5 {
+        let mut students_group_hbox = HorizontalBox::new(&ui);
+        students_group_hbox.set_padded(&ui, true);
+        for _ in 0..2 {
+            let mut group = Group::new(&ui, &format!("Team {}", team_names[counter]));
+            let label = Label::new(&ui, "");
+            students_labels.push(label.clone());
+            group.set_child(&ui, label);
+            students_group_hbox.append(&ui, group, LayoutStrategy::Stretchy);
+            counter += 1;
+        }
+        students_group_vbox.append(&ui, students_group_hbox, LayoutStrategy::Stretchy);
+    }
 
     team_number_slider.on_changed(&ui, {
         let ui = ui.clone();
@@ -206,27 +230,30 @@ fn main() {
     generate_button.on_clicked(&ui, {
         let ui = ui.clone();
         let team_number_slider = team_number_slider.clone();
-        let mut vbox = vbox.clone();
         move |_| {
             tb.assign_students_to_team(team_number_slider.value(&ui) as usize);
 
-            for team in tb.teams.iter().map(|x| &x.students) {
-                let mut group = Group::new(&ui, "Group");
-                let surnames: Vec<String> = team.iter().map(|student| student.surname.clone()).collect();
+            // Cleans the value of every label
+            for label in students_labels.iter_mut() {
+                label.set_text(&ui, "");
+            }
+
+            let mut counter = 0;
+            for team in tb.teams.iter().map(|team| &team.students) {
+                let surnames: Vec<String> =
+                    team.iter().map(|student| student.surname.clone()).collect();
 
                 let surname_list = surnames.iter().join(", ");
+                students_labels[counter].set_text(&ui, &surname_list);
 
-                let label = Label::new(&ui, &surname_list);
-                group.set_child(&ui, label);
-
-                vbox.append(&ui, group, LayoutStrategy::Stretchy);
+                counter += 1;
             }
         }
     });
 
     hbox.append(&ui, generate_button, LayoutStrategy::Stretchy);
-
     vbox.append(&ui, hbox, LayoutStrategy::Compact);
+    vbox.append(&ui, students_group_vbox, LayoutStrategy::Compact);
 
     win.set_child(&ui, vbox);
     win.show(&ui);
