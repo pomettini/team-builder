@@ -23,7 +23,6 @@ fn main() {
     let mut tb = TeamBuilder::load_file(&path).expect("File not found");
     tb.process_file().expect("Cannot process file");
     tb.calculate_teams_skill_level();
-    tb.sort_teams_by_skill_level();
 
     init_ui(&mut tb);
 }

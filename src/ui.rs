@@ -1,10 +1,16 @@
 use itertools::Itertools;
 use iui::controls::*;
 use iui::prelude::*;
+use strum::IntoEnumIterator;
 
 use crate::builder::*;
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
 pub fn init_ui(tb: &mut TeamBuilder) {
+    let sort_by: Rc<RefCell<Option<Skills>>> = Rc::new(RefCell::new(None));
+
     let ui = UI::init().expect("Couldn't initialize UI library");
     let mut win = Window::new(&ui, "Team Builder", 640, 400, WindowType::NoMenubar);
 
@@ -54,7 +60,9 @@ pub fn init_ui(tb: &mut TeamBuilder) {
     generate_button.on_clicked(&ui, {
         let ui = ui.clone();
         let team_number_slider = team_number_slider.clone();
+        let sort_by = sort_by.clone();
         move |_| {
+            tb.sort_teams_by_skill_level(*sort_by.borrow());
             tb.assign_students_to_team(team_number_slider.value(&ui) as usize);
 
             // Cleans the value of every label
@@ -77,6 +85,35 @@ pub fn init_ui(tb: &mut TeamBuilder) {
 
     hbox.append(&ui, generate_button, LayoutStrategy::Stretchy);
     vbox.append(&ui, hbox, LayoutStrategy::Compact);
+
+    let combo_box = Combobox::new(&ui);
+    combo_box.append(&ui, "Sort by Average");
+
+    for skill in Skills::iter() {
+        combo_box
+            .clone()
+            .append(&ui, &format!("Sort by {:?}", skill));
+    }
+
+    combo_box.clone().set_selected(&ui, 0);
+    combo_box.clone().on_selected(&ui, {
+        move |index| {
+            println!("{:?}", index);
+            match index {
+                // TODO: Must refactor
+                0 => *sort_by.borrow_mut() = None,
+                1 => *sort_by.borrow_mut() = Some(Skills::GameDesign),
+                2 => *sort_by.borrow_mut() = Some(Skills::LevelDesign),
+                3 => *sort_by.borrow_mut() = Some(Skills::Programming),
+                4 => *sort_by.borrow_mut() = Some(Skills::Narrative),
+                5 => *sort_by.borrow_mut() = Some(Skills::Graphics),
+                6 => *sort_by.borrow_mut() = Some(Skills::Teamwork),
+                _ => *sort_by.borrow_mut() = None,
+            }
+        }
+    });
+
+    vbox.append(&ui, combo_box, LayoutStrategy::Compact);
     vbox.append(&ui, students_group_vbox, LayoutStrategy::Compact);
 
     win.set_child(&ui, vbox);

@@ -144,7 +144,7 @@ fn test_sort_by_skill_level_best_green() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
 
     tb.calculate_teams_skill_level();
-    tb.sort_teams_by_skill_level();
+    tb.sort_teams_by_skill_level(None);
 
     assert_eq!(tb.students.last().unwrap().surname, "Bonanni");
 }
@@ -155,7 +155,7 @@ fn test_sort_by_skill_level_best_red() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
 
     tb.calculate_teams_skill_level();
-    tb.sort_teams_by_skill_level();
+    tb.sort_teams_by_skill_level(None);
 
     assert_eq!(tb.students.last().unwrap().surname, "Pomettini");
 }
@@ -165,7 +165,7 @@ fn test_sort_by_skill_level_worst_green() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
 
     tb.calculate_teams_skill_level();
-    tb.sort_teams_by_skill_level();
+    tb.sort_teams_by_skill_level(None);
 
     assert_eq!(tb.students.first().unwrap().surname, "Reclus");
 }
@@ -176,7 +176,49 @@ fn test_sort_by_skill_level_worst_red() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
 
     tb.calculate_teams_skill_level();
-    tb.sort_teams_by_skill_level();
+    tb.sort_teams_by_skill_level(None);
+
+    assert_eq!(tb.students.first().unwrap().surname, "Pomettini");
+}
+
+#[test]
+fn test_sort_by_skill_best_green() {
+    SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
+
+    tb.calculate_teams_skill_level();
+    tb.sort_teams_by_skill_level(Some(Skills::Programming));
+
+    assert_eq!(tb.students.last().unwrap().surname, "Pomettini");
+}
+
+#[test]
+#[should_panic]
+fn test_sort_by_specific_skill_best_red() {
+    SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
+
+    tb.calculate_teams_skill_level();
+    tb.sort_teams_by_skill_level(Some(Skills::Programming));
+
+    assert_eq!(tb.students.last().unwrap().surname, "De Dominicis");
+}
+
+#[test]
+fn test_sort_by_specific_skill_worst_green() {
+    SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
+
+    tb.calculate_teams_skill_level();
+    tb.sort_teams_by_skill_level(Some(Skills::Programming));
+
+    assert_eq!(tb.students.first().unwrap().surname, "De Dominicis");
+}
+
+#[test]
+#[should_panic]
+fn test_sort_by_specific_skill_worst_red() {
+    SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
+
+    tb.calculate_teams_skill_level();
+    tb.sort_teams_by_skill_level(Some(Skills::Programming));
 
     assert_eq!(tb.students.first().unwrap().surname, "Pomettini");
 }
@@ -186,7 +228,7 @@ fn test_assign_students_to_team_even() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
 
     tb.calculate_teams_skill_level();
-    tb.sort_teams_by_skill_level();
+    tb.sort_teams_by_skill_level(None);
     tb.assign_students_to_team(3);
 
     let first_team: Vec<String> = tb.teams[0]
@@ -211,7 +253,7 @@ fn test_assign_students_to_team_uneven() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_UNEVEN, path, tb);
 
     tb.calculate_teams_skill_level();
-    tb.sort_teams_by_skill_level();
+    tb.sort_teams_by_skill_level(None);
     tb.assign_students_to_team(2);
 
     let first_team: Vec<String> = tb.teams[0]

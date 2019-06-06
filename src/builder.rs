@@ -117,13 +117,21 @@ impl TeamBuilder {
         }
     }
 
-    pub fn sort_teams_by_skill_level(&mut self) {
+    pub fn sort_teams_by_skill_level(&mut self, sort_by: Option<Skills>) {
         // Order from lowest to greatest
-        self.students.sort_by(|a, b| {
-            a.average_skill_level
-                .partial_cmp(&b.average_skill_level)
-                .unwrap()
-        });
+        match sort_by {
+            None => {
+                self.students.sort_by(|a, b| {
+                    a.average_skill_level
+                        .partial_cmp(&b.average_skill_level)
+                        .unwrap()
+                });
+            }
+            Some(skill) => {
+                self.students
+                    .sort_by(|a, b| a.skills[&skill].partial_cmp(&b.skills[&skill]).unwrap());
+            }
+        }
     }
 
     pub fn assign_students_to_team(&mut self, students_per_team: usize) {
