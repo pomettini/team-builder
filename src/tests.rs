@@ -6,6 +6,10 @@ static TEST_FILE_EVEN: &str = "resources/test_even.csv";
 static TEST_FILE_UNEVEN: &str = "resources/test_uneven.csv";
 #[allow(dead_code)]
 static TEST_FILE_WRONG: &str = "resources/test.csv";
+#[allow(dead_code)]
+static TEST_FILE_SAME_VALUES: &str = "resources/test_same_values.csv";
+
+// TODO: Add tests for same values
 
 #[allow(unused_macros)]
 macro_rules! SETUP_TEAMBUILDER_TEST {

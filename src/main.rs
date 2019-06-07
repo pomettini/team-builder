@@ -1,4 +1,3 @@
-
 extern crate csv;
 extern crate serde_derive;
 extern crate strum;
