@@ -6,7 +6,7 @@ pub static TEAM_NAMES: [&str; 10] = [
     "Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel", "India", "Juliett",
 ];
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct Team {
     pub students: Vec<Student>,
 }
@@ -30,7 +30,7 @@ impl Student {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct TeamBuilder {
     pub teams: Vec<Team>,
     pub skills: Vec<String>,

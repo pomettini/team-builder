@@ -1,20 +1,36 @@
 extern crate csv;
+#[rustfmt::skip]
 extern crate serde_derive;
+#[rustfmt::skip]
 extern crate strum;
+#[rustfmt::skip]
 extern crate strum_macros;
-
+#[rustfmt::skip]
 extern crate itertools;
+#[rustfmt::skip]
 extern crate iui;
 
+#[rustfmt::skip]
 pub mod builder;
+#[rustfmt::skip]
+pub mod html_exporter;
+#[rustfmt::skip]
+pub mod csv_exporter;
+#[rustfmt::skip]
 pub mod ui;
 
 #[cfg(test)]
 pub mod tests;
 
+#[rustfmt::skip]
 use builder::*;
+#[rustfmt::skip]
+use html_exporter::*;
+#[rustfmt::skip]
+use csv_exporter::*;
+#[rustfmt::skip]
 use ui::*;
-
+#[rustfmt::skip]
 use std::path::Path;
 
 // TODO: Add exporter for teams
