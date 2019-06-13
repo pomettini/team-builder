@@ -125,7 +125,37 @@ pub fn init_ui(tb: &mut TeamBuilder) {
     });
 
     program_vbox.append(&ui, sort_by_skill_cb, LayoutStrategy::Compact);
+
+    program_vbox.append(&ui, HorizontalSeparator::new(&ui), LayoutStrategy::Compact);
+
     program_vbox.append(&ui, students_group_vbox, LayoutStrategy::Compact);
+
+    program_vbox.append(&ui, HorizontalSeparator::new(&ui), LayoutStrategy::Compact);
+
+    let mut exporters_hbox = HorizontalBox::new(&ui);
+    exporters_hbox.set_padded(&ui, true);
+
+    let mut generate_html_table_button = Button::new(&ui, "Export HTML Table");
+    generate_html_table_button.on_clicked(&ui, {
+        let ui = ui.clone();
+        let window = window.clone();
+        move |_| {
+            window.modal_err(&ui, "Warning", "Not yet implemented, come back later!");
+        }
+    });
+    exporters_hbox.append(&ui, generate_html_table_button, LayoutStrategy::Stretchy);
+
+    let mut generate_csv_table_button = Button::new(&ui, "Export CSV Table");
+    generate_csv_table_button.on_clicked(&ui, {
+        let ui = ui.clone();
+        let window = window.clone();
+        move |_| {
+            window.modal_err(&ui, "Warning", "Not yet implemented, come back later!");
+        }
+    });
+    exporters_hbox.append(&ui, generate_csv_table_button, LayoutStrategy::Stretchy);
+
+    program_vbox.append(&ui, exporters_hbox, LayoutStrategy::Compact);
 
     window.set_child(&ui, program_vbox);
     window.show(&ui);
