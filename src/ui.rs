@@ -78,8 +78,16 @@ pub fn init_ui(tb: &mut TeamBuilder) {
             // Assigns the teams on each label
             let mut counter = 0;
             for team in tb.teams.iter().map(|team| &team.students) {
-                let surnames: Vec<String> =
-                    team.iter().map(|student| student.surname.clone()).collect();
+                let surnames: Vec<String> = team
+                    .iter()
+                    .map(|student| {
+                        format!(
+                            "{} [{:.1}]",
+                            student.surname.clone(),
+                            student.average_skill_level
+                        )
+                    })
+                    .collect();
 
                 let surname_list = surnames.iter().join(", ");
                 students_labels[counter].set_text(&ui, &surname_list);

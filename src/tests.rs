@@ -262,8 +262,8 @@ fn test_assign_students_to_team_even() {
         .collect();
 
     assert_eq!(tb.teams.len(), 2);
-    assert_eq!(first_team, vec!["Bonanni", "De Dominicis", "Leotta"]);
-    assert_eq!(second_team, vec!["Ricchiuti", "Pomettini", "Reclus"]);
+    assert_eq!(first_team, vec!["Bonanni", "Pomettini", "Leotta"]);
+    assert_eq!(second_team, vec!["Ricchiuti", "De Dominicis", "Reclus"]);
 }
 
 #[test]
@@ -287,6 +287,6 @@ fn test_assign_students_to_team_uneven() {
         .collect();
 
     assert_eq!(tb.teams.len(), 2);
-    assert_eq!(first_team, vec!["Bonanni", "De Dominicis", "Leotta"]);
-    assert_eq!(second_team, vec!["Ricchiuti", "Pomettini"]);
+    assert_eq!(first_team, vec!["Bonanni", "Pomettini", "Leotta"]);
+    assert_eq!(second_team, vec!["Ricchiuti", "De Dominicis"]);
 }

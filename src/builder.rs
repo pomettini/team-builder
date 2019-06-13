@@ -133,11 +133,37 @@ impl TeamBuilder {
             teams.push(Default::default());
         }
 
+        enum Direction {
+            Forward,
+            Backward,
+        }
+
+        let mut direction = Direction::Forward;
+        let mut team_index = 0;
+
         while !students.is_empty() {
-            for team in &mut teams {
-                match students.pop() {
-                    Some(s) => team.students.push(s),
-                    None => break,
+            let student = match students.pop() {
+                Some(student) => student,
+                None => break,
+            };
+
+            teams[team_index].students.push(student);
+
+            // TODO: Needs refactor
+            match direction {
+                Direction::Forward => {
+                    if team_index < teams.len() - 1 {
+                        team_index += 1;
+                    } else {
+                        direction = Direction::Backward;
+                    }
+                }
+                Direction::Backward => {
+                    if team_index > 0 {
+                        team_index -= 1;
+                    } else {
+                        direction = Direction::Forward;
+                    }
                 }
             }
         }
