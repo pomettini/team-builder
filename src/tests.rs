@@ -11,6 +11,19 @@ static TEST_FILE_SAME_VALUES: &str = "resources/test_same_values.csv";
 
 // TODO: Add tests for same values
 
+#[allow(dead_code)]
+const SKILL_GAME_DESIGN: usize = 0;
+#[allow(dead_code)]
+const SKILL_LEVEL_DESIGN: usize = 1;
+#[allow(dead_code)]
+const SKILL_PROGRAMMING: usize = 2;
+#[allow(dead_code)]
+const SKILL_NARRATIVE: usize = 3;
+#[allow(dead_code)]
+const SKILL_GRAPHICS: usize = 4;
+#[allow(dead_code)]
+const SKILL_TEAMWORK: usize = 5;
+
 #[allow(unused_macros)]
 macro_rules! SETUP_TEAMBUILDER_TEST {
     ($file:expr, $path:ident, $tb:ident) => {
@@ -190,7 +203,7 @@ fn test_sort_by_skill_best_green() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
 
     tb.calculate_teams_skill_level();
-    tb.sort_teams_by_skill_level(Some(Skills::Programming));
+    tb.sort_teams_by_skill_level(Some(SKILL_PROGRAMMING));
 
     assert_eq!(tb.students.last().unwrap().surname, "Pomettini");
 }
@@ -201,7 +214,8 @@ fn test_sort_by_specific_skill_best_red() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
 
     tb.calculate_teams_skill_level();
-    tb.sort_teams_by_skill_level(Some(Skills::Programming));
+    // Programming
+    tb.sort_teams_by_skill_level(Some(SKILL_PROGRAMMING));
 
     assert_eq!(tb.students.last().unwrap().surname, "De Dominicis");
 }
@@ -211,7 +225,7 @@ fn test_sort_by_specific_skill_worst_green() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
 
     tb.calculate_teams_skill_level();
-    tb.sort_teams_by_skill_level(Some(Skills::Programming));
+    tb.sort_teams_by_skill_level(Some(SKILL_PROGRAMMING));
 
     assert_eq!(tb.students.first().unwrap().surname, "De Dominicis");
 }
@@ -222,7 +236,7 @@ fn test_sort_by_specific_skill_worst_red() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
 
     tb.calculate_teams_skill_level();
-    tb.sort_teams_by_skill_level(Some(Skills::Programming));
+    tb.sort_teams_by_skill_level(Some(SKILL_PROGRAMMING));
 
     assert_eq!(tb.students.first().unwrap().surname, "Pomettini");
 }

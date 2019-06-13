@@ -1,7 +1,6 @@
 use itertools::Itertools;
 use iui::controls::*;
 use iui::prelude::*;
-use strum::IntoEnumIterator;
 
 use crate::builder::*;
 
@@ -11,7 +10,8 @@ use std::rc::Rc;
 pub fn init_ui(tb: &mut TeamBuilder) {
     // Wrapped with Interior Mutability Pattern
     // Because I need to pass the state around between UI controls
-    let sort_by: Rc<RefCell<Option<Skills>>> = Rc::new(RefCell::new(None));
+    let sort_by: Rc<RefCell<Option<usize>>> = Rc::new(RefCell::new(None));
+    let skills = tb.skills.clone();
 
     let ui = UI::init().expect("Couldn't initialize UI library");
     let mut window = Window::new(&ui, "Team Builder", 640, 400, WindowType::NoMenubar);
@@ -96,26 +96,22 @@ pub fn init_ui(tb: &mut TeamBuilder) {
     sort_by_skill_cb.append(&ui, "Sort by Average");
 
     // Add each skill to the ComboBox
-    for skill in Skills::iter() {
+    for skill in skills {
+        print!("{}", skill);
         sort_by_skill_cb
             .clone()
-            .append(&ui, &format!("Sort by {:?}", skill));
+            .append(&ui, &format!("Sort by {}", skill));
     }
 
     // Updates the value of the sorting variable
     sort_by_skill_cb.clone().set_selected(&ui, 0);
     sort_by_skill_cb.clone().on_selected(&ui, {
         move |index| {
-            match index {
-                // TODO: Must refactor
-                0 => *sort_by.borrow_mut() = None,
-                1 => *sort_by.borrow_mut() = Some(Skills::GameDesign),
-                2 => *sort_by.borrow_mut() = Some(Skills::LevelDesign),
-                3 => *sort_by.borrow_mut() = Some(Skills::Programming),
-                4 => *sort_by.borrow_mut() = Some(Skills::Narrative),
-                5 => *sort_by.borrow_mut() = Some(Skills::Graphics),
-                6 => *sort_by.borrow_mut() = Some(Skills::Teamwork),
-                _ => *sort_by.borrow_mut() = None,
+            // TODO: Need refactor
+            if index == 0 {
+                *sort_by.borrow_mut() = None;
+            } else {
+                *sort_by.borrow_mut() = Some((index - 1) as usize);
             }
         }
     });

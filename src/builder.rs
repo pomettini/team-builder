@@ -1,31 +1,10 @@
 use csv::ReaderBuilder;
-use std::collections::HashMap;
 use std::fs::*;
 use std::path::Path;
-use strum::IntoEnumIterator;
-use strum_macros::EnumIter;
-
-macro_rules! add_student {
-    ($student:expr, $record:expr, $skill:expr, $id:expr) => {
-        $student
-            .skills
-            .insert($skill, $record[$id].parse::<u8>().unwrap());
-    };
-}
 
 pub static TEAM_NAMES: [&str; 10] = [
     "Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel", "India", "Juliett",
 ];
-
-#[derive(Debug, Eq, PartialEq, Hash, Clone, EnumIter, Copy)]
-pub enum Skills {
-    GameDesign = 1,
-    LevelDesign = 2,
-    Programming = 3,
-    Narrative = 4,
-    Graphics = 5,
-    Teamwork = 6,
-}
 
 #[derive(Default, Debug)]
 pub struct Team {
@@ -35,7 +14,7 @@ pub struct Team {
 #[derive(Default, Debug, PartialEq, Clone)]
 pub struct Student {
     pub surname: String,
-    pub skills: HashMap<Skills, u8>,
+    pub skill_levels: Vec<u8>,
     pub average_skill_level: f32,
 }
 
@@ -43,17 +22,18 @@ impl Student {
     pub fn get_average_skills(&self) -> f32 {
         let mut sum: u8 = 0;
 
-        for skill in &self.skills {
-            sum += skill.1;
+        for skill in &self.skill_levels {
+            sum += skill;
         }
 
-        f32::from(sum) / self.skills.len() as f32
+        f32::from(sum) / self.skill_levels.len() as f32
     }
 }
 
 #[derive(Default)]
 pub struct TeamBuilder {
     pub teams: Vec<Team>,
+    pub skills: Vec<String>,
     pub students: Vec<Student>,
     pub students_file: String,
 }
@@ -66,6 +46,7 @@ impl TeamBuilder {
             Ok(contents) => {
                 let result = Self {
                     teams: Vec::new(),
+                    skills: Vec::new(),
                     students: Vec::new(),
                     students_file: contents,
                 };
@@ -82,14 +63,20 @@ impl TeamBuilder {
             .delimiter(b';')
             .from_reader(self.students_file.as_bytes());
 
+        for skill in reader.headers().unwrap().iter().skip(1) {
+            self.skills.push(skill.to_string());
+        }
+
         for record in reader.records() {
             let record = record.unwrap();
             let mut student: Student = Default::default();
 
             student.surname = record[0].to_string();
 
-            for skill in Skills::iter() {
-                add_student!(student, record, skill, skill as usize);
+            for index in 0..self.skills.len() {
+                student
+                    .skill_levels
+                    .push(record[index + 1].parse::<u8>().unwrap());
             }
 
             students.push(student);
@@ -117,7 +104,7 @@ impl TeamBuilder {
         }
     }
 
-    pub fn sort_teams_by_skill_level(&mut self, sort_by: Option<Skills>) {
+    pub fn sort_teams_by_skill_level(&mut self, sort_by: Option<usize>) {
         // Order from lowest to greatest
         match sort_by {
             None => {
@@ -128,8 +115,11 @@ impl TeamBuilder {
                 });
             }
             Some(skill) => {
-                self.students
-                    .sort_by(|a, b| a.skills[&skill].partial_cmp(&b.skills[&skill]).unwrap());
+                self.students.sort_by(|a, b| {
+                    a.skill_levels[skill]
+                        .partial_cmp(&b.skill_levels[skill])
+                        .unwrap()
+                });
             }
         }
     }

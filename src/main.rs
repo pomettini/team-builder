@@ -17,6 +17,9 @@ use ui::*;
 
 use std::path::Path;
 
+// TODO: Add exporter for teams
+// TODO: Make some kind of graph
+
 fn main() {
     let path = Path::new("resources/students.csv");
     let mut tb = TeamBuilder::load_file(&path).expect("File not found");
