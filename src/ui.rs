@@ -15,11 +15,21 @@ use crate::html_exporter::*;
 #[rustfmt::skip]
 use crate::csv_exporter::*;
 
+// State shared between UI components
+struct State {
+    teams: Vec<Team>,
+    skills: Vec<String>,
+    sort_by: Option<usize>,
+}
+
 pub fn init_ui(tb: &mut TeamBuilder) {
     // Wrapped with Interior Mutability Pattern
     // Because I need to pass the state around between UI controls
-    let sort_by: Rc<RefCell<Option<usize>>> = Rc::new(RefCell::new(None));
-    let skills = tb.skills.clone();
+    let state = Rc::new(RefCell::new(State {
+        teams: Vec::new(),
+        skills: tb.skills.clone(),
+        sort_by: None,
+    }));
 
     let ui = UI::init().expect("Couldn't initialize UI library");
     let mut window = Window::new(&ui, "Team Builder", 640, 400, WindowType::NoMenubar);
@@ -72,16 +82,18 @@ pub fn init_ui(tb: &mut TeamBuilder) {
     generate_button.on_clicked(&ui, {
         let ui = ui.clone();
         let team_number_slider = team_number_slider.clone();
-        let sort_by = sort_by.clone();
+        let state = state.clone();
         move |_| {
             // Do stuff with teams data
-            tb.sort_teams_by_skill_level(*sort_by.borrow());
+            tb.sort_teams_by_skill_level(state.borrow().sort_by);
             tb.assign_students_to_team(team_number_slider.value(&ui) as usize);
 
             // Cleans the value of every label
             for label in students_labels.iter_mut() {
                 label.set_text(&ui, "");
             }
+
+            state.borrow_mut().teams = tb.teams.clone();
 
             // Assigns the teams on each label
             let mut counter = 0;
@@ -112,7 +124,7 @@ pub fn init_ui(tb: &mut TeamBuilder) {
     sort_by_skill_cb.append(&ui, "Sort by Average");
 
     // Add each skill to the ComboBox
-    for skill in skills {
+    for skill in &state.borrow().skills {
         print!("{}", skill);
         sort_by_skill_cb
             .clone()
@@ -122,12 +134,13 @@ pub fn init_ui(tb: &mut TeamBuilder) {
     // Updates the value of the sorting variable
     sort_by_skill_cb.clone().set_selected(&ui, 0);
     sort_by_skill_cb.clone().on_selected(&ui, {
+        let state = state.clone();
         move |index| {
             // TODO: Need refactor
             if index == 0 {
-                *sort_by.borrow_mut() = None;
+                state.borrow_mut().sort_by = None;
             } else {
-                *sort_by.borrow_mut() = Some((index - 1) as usize);
+                state.borrow_mut().sort_by = Some((index - 1) as usize);
             }
         }
     });
@@ -145,20 +158,18 @@ pub fn init_ui(tb: &mut TeamBuilder) {
 
     let mut generate_html_table_button = Button::new(&ui, "Export HTML Table");
     generate_html_table_button.on_clicked(&ui, {
-        let ui = ui.clone();
-        let window = window.clone();
+        let state = state.clone();
         move |_| {
-            window.modal_err(&ui, "Warning", "Not yet implemented, come back later!");
+            generate_html(&state.borrow().teams);
         }
     });
     exporters_hbox.append(&ui, generate_html_table_button, LayoutStrategy::Stretchy);
 
     let mut generate_csv_table_button = Button::new(&ui, "Export CSV Table");
     generate_csv_table_button.on_clicked(&ui, {
-        let ui = ui.clone();
-        let window = window.clone();
+        let state = state.clone();
         move |_| {
-            window.modal_err(&ui, "Warning", "Not yet implemented, come back later!");
+            generate_csv(&state.borrow().teams);
         }
     });
     exporters_hbox.append(&ui, generate_csv_table_button, LayoutStrategy::Stretchy);

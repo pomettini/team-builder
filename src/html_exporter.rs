@@ -24,24 +24,25 @@ tr:nth-child(even) {
 </head>
 <body>";
 
+#[allow(dead_code)]
 const HTML_FOOTER: &str = "</body>
 </html>";
 
+// TODO: Export as an external crate
+
 pub fn generate_html(teams: &Vec<Team>) {
-    let mut html = String::new();
+  let mut html = String::new();
 
-    html.push_str("<table>");
+  html.push_str("<table>");
 
-    for team in teams {
-        html.push_str("<tr>");
-        for student in &team.students
-        {
-            html.push_str(&student.surname);
-        }
-        html.push_str("</tr>");
+  for team in teams {
+    html.push_str("<tr>");
+    for student in &team.students {
+      html.push_str(&student.surname);
     }
+    html.push_str("</tr>");
+  }
+  html.push_str("</table>");
 
-    html.push_str("</table>");
-
-    println!("{}", html);
+  println!("{}", html);
 }
