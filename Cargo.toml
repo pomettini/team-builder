@@ -12,3 +12,4 @@ strum = ">=0.15.0"
 strum_macros = ">=0.15.0"
 iui = { git = "https://github.com/rust-native-ui/libui-rs.git" }
 itertools = ">=0.8.0"
+simple_excel_writer = ">=0.1.5"

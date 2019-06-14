@@ -1,0 +1,30 @@
+#[rustfmt::skip]
+use crate::builder::*;
+
+use excel::*;
+
+pub fn generate_spreadsheet(teams: &[Team]) {
+    let mut workbook = excel::Workbook::create("test.xlsx");
+    let mut sheet = workbook.create_sheet("test_sheet");
+
+    // TODO: Add column padding
+    workbook
+        .write_sheet(&mut sheet, |data| {
+            for team in teams {
+                let mut row = Row::new();
+
+                // TODO: Remove hardcoded team name
+                row.add_cell("Team name");
+
+                for student in &team.students {
+                    row.add_cell(student.surname.as_str());
+                }
+
+                data.append_row(row).unwrap();
+            }
+            Ok(())
+        })
+        .expect("Write Excel error!");
+
+    workbook.close().expect("Close Excel error!");
+}

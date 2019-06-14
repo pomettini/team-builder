@@ -1,3 +1,4 @@
+#[rustfmt::skip]
 extern crate csv;
 #[rustfmt::skip]
 extern crate serde_derive;
@@ -9,13 +10,16 @@ extern crate strum_macros;
 extern crate itertools;
 #[rustfmt::skip]
 extern crate iui;
+#[rustfmt::skip]
+#[macro_use]
+extern crate simple_excel_writer as excel;
 
 #[rustfmt::skip]
 pub mod builder;
 #[rustfmt::skip]
 pub mod html_exporter;
 #[rustfmt::skip]
-pub mod csv_exporter;
+pub mod spreadsheet_exporter;
 #[rustfmt::skip]
 pub mod ui;
 
@@ -28,9 +32,6 @@ use builder::*;
 use ui::*;
 #[rustfmt::skip]
 use std::path::Path;
-
-// TODO: Add exporter for teams
-// TODO: Make some kind of graph
 
 fn main() {
     let path = Path::new("resources/students.csv");

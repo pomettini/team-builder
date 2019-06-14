@@ -13,7 +13,7 @@ use std::rc::Rc;
 #[rustfmt::skip]
 use crate::html_exporter::*;
 #[rustfmt::skip]
-use crate::csv_exporter::*;
+use crate::spreadsheet_exporter::*;
 
 // State shared between UI components
 struct State {
@@ -160,16 +160,18 @@ pub fn init_ui(tb: &mut TeamBuilder) {
     generate_html_table_button.on_clicked(&ui, {
         let state = state.clone();
         move |_| {
+            // TODO: Must show warning if file is empty
             generate_html(&state.borrow().teams);
         }
     });
     exporters_hbox.append(&ui, generate_html_table_button, LayoutStrategy::Stretchy);
 
-    let mut generate_csv_table_button = Button::new(&ui, "Export CSV Table");
+    let mut generate_csv_table_button = Button::new(&ui, "Export Excel Table");
     generate_csv_table_button.on_clicked(&ui, {
         let state = state.clone();
         move |_| {
-            generate_csv(&state.borrow().teams);
+            // TODO: Must show warning if file is empty
+            generate_spreadsheet(&state.borrow().teams);
         }
     });
     exporters_hbox.append(&ui, generate_csv_table_button, LayoutStrategy::Stretchy);

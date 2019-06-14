@@ -3,7 +3,6 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::process::Command;
 
-#[allow(dead_code)]
 const HTML_HEADER: &str = "<!DOCTYPE html>
 <html>
 <head>
@@ -27,14 +26,13 @@ tr:nth-child(even) {
 </head>
 <body>";
 
-#[allow(dead_code)]
 const HTML_FOOTER: &str = "</body>
 </html>";
 
 // TODO: Export as an external crate
 // TODO: Add missing cells if empty
 
-pub fn generate_html(teams: &Vec<Team>) {
+pub fn generate_html(teams: &[Team]) {
   let mut html = String::new();
 
   html.push_str(HTML_HEADER);
@@ -44,6 +42,7 @@ pub fn generate_html(teams: &Vec<Team>) {
   for team in teams {
     html.push_str("<tr>");
 
+    // TODO: Remove hardcoded team name
     html.push_str(&format!("<th>{}</th>", "Team name"));
 
     for student in &team.students {
