@@ -1,7 +1,4 @@
 use crate::builder::*;
-use std::fs::File;
-use std::io::prelude::*;
-use std::process::Command;
 
 const HTML_HEADER: &str = "<!DOCTYPE html>
 <html>
@@ -32,7 +29,7 @@ const HTML_FOOTER: &str = "</body>
 // TODO: Export as an external crate
 // TODO: Add missing cells if empty
 
-pub fn generate_html(teams: &[Team]) {
+pub fn generate_html(teams: &[Team]) -> Option<String> {
   let mut html = String::new();
 
   html.push_str(HTML_HEADER);
@@ -56,8 +53,5 @@ pub fn generate_html(teams: &[Team]) {
 
   html.push_str(HTML_FOOTER);
 
-  let mut file = File::create("table.html").unwrap();
-  file.write_all(html.as_bytes()).unwrap();
-
-  Command::new("open").arg("table.html").output().unwrap();
+  return Some(html);
 }

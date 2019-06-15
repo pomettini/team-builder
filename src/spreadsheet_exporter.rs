@@ -4,6 +4,7 @@ use crate::builder::*;
 use excel::*;
 
 pub fn generate_spreadsheet(teams: &[Team]) {
+    // TODO: Remove hardcoded values
     let mut workbook = excel::Workbook::create("test.xlsx");
     let mut sheet = workbook.create_sheet("test_sheet");
 

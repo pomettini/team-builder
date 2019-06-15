@@ -14,6 +14,9 @@ use std::rc::Rc;
 use crate::html_exporter::*;
 #[rustfmt::skip]
 use crate::spreadsheet_exporter::*;
+use std::fs::File;
+use std::io::prelude::*;
+use std::process::Command;
 
 // State shared between UI components
 struct State {
@@ -51,7 +54,7 @@ pub fn init_ui(tb: &mut TeamBuilder) {
     let mut students_group_vbox = VerticalBox::new(&ui);
     students_group_vbox.set_padded(&ui, true);
 
-    // TODO: Must refactor
+    // FIXME: Must refactor
     // Creates two columns and five rows for the teams
     let mut counter = 0;
     for _ in 0..5 {
@@ -125,7 +128,6 @@ pub fn init_ui(tb: &mut TeamBuilder) {
 
     // Add each skill to the ComboBox
     for skill in &state.borrow().skills {
-        print!("{}", skill);
         sort_by_skill_cb
             .clone()
             .append(&ui, &format!("Sort by {}", skill));
@@ -136,7 +138,7 @@ pub fn init_ui(tb: &mut TeamBuilder) {
     sort_by_skill_cb.clone().on_selected(&ui, {
         let state = state.clone();
         move |index| {
-            // TODO: Need refactor
+            // FIXME: Need refactor
             if index == 0 {
                 state.borrow_mut().sort_by = None;
             } else {
@@ -158,20 +160,52 @@ pub fn init_ui(tb: &mut TeamBuilder) {
 
     let mut generate_html_table_button = Button::new(&ui, "Export HTML Table");
     generate_html_table_button.on_clicked(&ui, {
+        let ui = ui.clone();
+        let window = window.clone();
         let state = state.clone();
         move |_| {
-            // TODO: Must show warning if file is empty
-            generate_html(&state.borrow().teams);
+            if state.borrow().teams.is_empty() {
+                window.modal_msg(&ui, "Warning", "Please generate the teams first");
+                return;
+            }
+
+            let save_file_path = window.save_file(&ui);
+
+            let save_file_path = match save_file_path {
+                Some(path) => path.with_extension("html"),
+                None => {
+                    window.modal_msg(&ui, "Warning", "Please enter a valid file name");
+                    return;
+                }
+            };
+
+            let html_output = generate_html(&state.borrow().teams).unwrap();
+
+            let mut file = File::create(&save_file_path).unwrap();
+            file.write_all(html_output.as_bytes()).unwrap();
+
+            Command::new("open").arg(save_file_path).output().unwrap();
         }
     });
     exporters_hbox.append(&ui, generate_html_table_button, LayoutStrategy::Stretchy);
 
     let mut generate_csv_table_button = Button::new(&ui, "Export Excel Table");
     generate_csv_table_button.on_clicked(&ui, {
+        let ui = ui.clone();
+        let window = window.clone();
         let state = state.clone();
+        // TODO: Refactor code to avoid duplication
         move |_| {
+            if state.borrow().teams.is_empty() {
+                window.modal_msg(&ui, "Warning", "Please generate the teams first");
+                return;
+            }
+
+            // let save_file_path = window.save_file(&ui);
+
             // TODO: Must show warning if file is empty
-            generate_spreadsheet(&state.borrow().teams);
+            // generate_spreadsheet(&state.borrow().teams);
+            // TODO: Ask user where to save file
         }
     });
     exporters_hbox.append(&ui, generate_csv_table_button, LayoutStrategy::Stretchy);

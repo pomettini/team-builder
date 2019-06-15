@@ -149,7 +149,7 @@ impl TeamBuilder {
 
             teams[team_index].students.push(student);
 
-            // TODO: Needs refactor
+            // FIXME: Needs refactor
             match direction {
                 Direction::Forward => {
                     if team_index < teams.len() - 1 {
