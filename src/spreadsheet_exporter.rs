@@ -1,4 +1,5 @@
-#[rustfmt::skip]
+#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
+
 use crate::builder::*;
 
 use excel::*;

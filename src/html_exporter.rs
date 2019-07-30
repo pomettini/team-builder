@@ -1,3 +1,5 @@
+#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
+
 use crate::builder::*;
 
 const HTML_HEADER: &str = "<!DOCTYPE html>
@@ -53,5 +55,5 @@ pub fn generate_html(teams: &[Team]) -> Option<String> {
 
   html.push_str(HTML_FOOTER);
 
-  return Some(html);
+  Some(html)
 }

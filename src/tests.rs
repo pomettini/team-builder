@@ -1,27 +1,23 @@
+#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
+
+extern crate float_cmp;
+
+use crate::tests::float_cmp::*;
+
 use super::*;
 
-#[allow(dead_code)]
 static TEST_FILE_EVEN: &str = "resources/test_even.csv";
-#[allow(dead_code)]
 static TEST_FILE_UNEVEN: &str = "resources/test_uneven.csv";
-#[allow(dead_code)]
 static TEST_FILE_WRONG: &str = "resources/test.csv";
-#[allow(dead_code)]
 static TEST_FILE_SAME_VALUES: &str = "resources/test_same_values.csv";
 
 // TODO: Add tests for same values
 
-#[allow(dead_code)]
 const SKILL_GAME_DESIGN: usize = 0;
-#[allow(dead_code)]
 const SKILL_LEVEL_DESIGN: usize = 1;
-#[allow(dead_code)]
 const SKILL_PROGRAMMING: usize = 2;
-#[allow(dead_code)]
 const SKILL_NARRATIVE: usize = 3;
-#[allow(dead_code)]
 const SKILL_GRAPHICS: usize = 4;
-#[allow(dead_code)]
 const SKILL_TEAMWORK: usize = 5;
 
 #[allow(unused_macros)]
@@ -44,27 +40,27 @@ macro_rules! SETUP_TEAMBUILDER_TEST_AND_INIT {
 #[test]
 fn test_load_csv_correct_path() {
     SETUP_TEAMBUILDER_TEST!(TEST_FILE_EVEN, path, tb);
-    assert!(tb.students_file.len() > 0);
+    assert!(!tb.students_file.is_empty());
 }
 
 #[test]
 #[should_panic]
 fn test_load_csv_wrong_path() {
     SETUP_TEAMBUILDER_TEST!(TEST_FILE_WRONG, path, tb);
-    assert!(tb.students_file.len() > 0);
+    assert!(!tb.students_file.is_empty());
 }
 
 #[test]
 fn test_load_csv_valid_content() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
-    assert!(tb.students.len() > 0);
+    assert!(!tb.students.is_empty());
 }
 
 #[test]
 #[should_panic]
 fn test_load_csv_not_valid_content() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_WRONG, path, tb);
-    assert!(tb.students.len() > 0);
+    assert!(!tb.students.is_empty());
 }
 
 #[test]
@@ -83,16 +79,36 @@ fn test_get_students_number_red() {
 #[test]
 fn test_get_students_skills_average_green() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
-    assert_eq!(tb.students[0].get_average_skills(), 2.0);
-    assert_eq!(tb.students[1].get_average_skills(), 2.1666667);
+    assert!(approx_eq!(
+        f32,
+        tb.students[0].get_average_skills(),
+        2.0,
+        F32Margin::default()
+    ));
+    assert!(approx_eq!(
+        f32,
+        tb.students[1].get_average_skills(),
+        2.166_666_7,
+        F32Margin::default()
+    ));
 }
 
 #[test]
 #[should_panic]
 fn test_get_students_skills_average_red() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
-    assert_eq!(tb.students[0].get_average_skills(), 3.0);
-    assert_eq!(tb.students[1].get_average_skills(), 3.0);
+    assert!(approx_eq!(
+        f32,
+        tb.students[0].get_average_skills(),
+        3.0,
+        F32Margin::default()
+    ));
+    assert!(approx_eq!(
+        f32,
+        tb.students[1].get_average_skills(),
+        3.0,
+        F32Margin::default()
+    ));
 }
 
 #[test]
@@ -137,7 +153,12 @@ fn test_calculate_skill_level_green() {
         .find(|&x| x.surname == "Pomettini")
         .unwrap();
 
-    assert_eq!(student.average_skill_level, 1.8333334);
+    assert!(approx_eq!(
+        f32,
+        student.average_skill_level,
+        1.833_333,
+        F32Margin::default()
+    ));
 }
 
 #[test]
@@ -153,7 +174,12 @@ fn test_calculate_skill_level_red() {
         .find(|&x| x.surname == "Pomettini")
         .unwrap();
 
-    assert_eq!(student.average_skill_level, 2.0);
+    assert!(approx_eq!(
+        f32,
+        student.average_skill_level,
+        2.0,
+        F32Margin::default()
+    ));
 }
 
 #[test]

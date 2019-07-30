@@ -1,22 +1,16 @@
-#[rustfmt::skip]
-use itertools::Itertools;
-#[rustfmt::skip]
-use iui::controls::*;
-#[rustfmt::skip]
-use iui::prelude::*;
-#[rustfmt::skip]
+#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
+
 use crate::builder::*;
-#[rustfmt::skip]
-use std::cell::RefCell;
-#[rustfmt::skip]
-use std::rc::Rc;
-#[rustfmt::skip]
 use crate::html_exporter::*;
-#[rustfmt::skip]
-use crate::spreadsheet_exporter::*;
+
+use itertools::Itertools;
+use iui::controls::*;
+use iui::prelude::*;
+use std::cell::RefCell;
 use std::fs::File;
 use std::io::prelude::*;
 use std::process::Command;
+use std::rc::Rc;
 
 // State shared between UI components
 struct State {
@@ -193,7 +187,7 @@ pub fn init_ui(tb: &mut TeamBuilder) {
     generate_csv_table_button.on_clicked(&ui, {
         let ui = ui.clone();
         let window = window.clone();
-        let state = state.clone();
+        let state = state;
         // TODO: Refactor code to avoid duplication
         move |_| {
             if state.borrow().teams.is_empty() {

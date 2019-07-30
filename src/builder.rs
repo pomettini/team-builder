@@ -1,6 +1,13 @@
+#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
+
 use csv::ReaderBuilder;
 use std::fs::*;
 use std::path::Path;
+
+enum Direction {
+    Forward,
+    Backward,
+}
 
 pub static TEAM_NAMES: [&str; 10] = [
     "Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel", "India", "Juliett",
@@ -69,7 +76,7 @@ impl TeamBuilder {
 
         for record in reader.records() {
             let record = record.unwrap();
-            let mut student: Student = Default::default();
+            let mut student: Student = Student::default();
 
             student.surname = record[0].to_string();
 
@@ -130,12 +137,7 @@ impl TeamBuilder {
         let mut students = self.students.clone();
 
         for _ in 0..number_of_teams.0 {
-            teams.push(Default::default());
-        }
-
-        enum Direction {
-            Forward,
-            Backward,
+            teams.push(Team::default());
         }
 
         let mut direction = Direction::Forward;
