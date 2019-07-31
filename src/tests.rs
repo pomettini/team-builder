@@ -1,5 +1,3 @@
-#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
-
 extern crate float_cmp;
 
 use crate::tests::float_cmp::*;
@@ -9,15 +7,20 @@ use super::*;
 static TEST_FILE_EVEN: &str = "resources/test_even.csv";
 static TEST_FILE_UNEVEN: &str = "resources/test_uneven.csv";
 static TEST_FILE_WRONG: &str = "resources/test.csv";
+#[allow(dead_code)]
 static TEST_FILE_SAME_VALUES: &str = "resources/test_same_values.csv";
 
-// TODO: Add tests for same values
-
+#[allow(dead_code)]
 const SKILL_GAME_DESIGN: usize = 0;
+#[allow(dead_code)]
 const SKILL_LEVEL_DESIGN: usize = 1;
+#[allow(dead_code)]
 const SKILL_PROGRAMMING: usize = 2;
+#[allow(dead_code)]
 const SKILL_NARRATIVE: usize = 3;
+#[allow(dead_code)]
 const SKILL_GRAPHICS: usize = 4;
+#[allow(dead_code)]
 const SKILL_TEAMWORK: usize = 5;
 
 #[allow(unused_macros)]
@@ -25,7 +28,8 @@ macro_rules! SETUP_TEAMBUILDER_TEST {
     ($file:expr, $path:ident, $tb:ident) => {
         let $path = Path::new($file);
         #[allow(unused_mut)]
-        let mut $tb = TeamBuilder::load_file(&$path).expect("File not found");
+        let mut $tb = TeamBuilder::new();
+        $tb.load_file(&$path).expect("File not found");
     };
 }
 
@@ -70,10 +74,31 @@ fn test_get_students_number_green() {
 }
 
 #[test]
-#[should_panic]
 fn test_get_students_number_red() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
-    assert_eq!(tb.students.len(), 0);
+    assert_ne!(tb.students.len(), 0);
+}
+
+#[test]
+fn test_get_skills_green() {
+    SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
+    assert_eq!(
+        tb.skills,
+        vec![
+            "Game Design",
+            "Level Design",
+            "Programming",
+            "Narrative",
+            "Graphics",
+            "Teamwork"
+        ]
+    );
+}
+
+#[test]
+fn test_get_skills_red() {
+    SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
+    assert_ne!(tb.skills, vec!["None"]);
 }
 
 #[test]
@@ -94,16 +119,15 @@ fn test_get_students_skills_average_green() {
 }
 
 #[test]
-#[should_panic]
 fn test_get_students_skills_average_red() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
-    assert!(approx_eq!(
+    assert!(!approx_eq!(
         f32,
         tb.students[0].get_average_skills(),
         3.0,
         F32Margin::default()
     ));
-    assert!(approx_eq!(
+    assert!(!approx_eq!(
         f32,
         tb.students[1].get_average_skills(),
         3.0,
@@ -162,7 +186,6 @@ fn test_calculate_skill_level_green() {
 }
 
 #[test]
-#[should_panic]
 fn test_calculate_skill_level_red() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
 
@@ -174,7 +197,7 @@ fn test_calculate_skill_level_red() {
         .find(|&x| x.surname == "Pomettini")
         .unwrap();
 
-    assert!(approx_eq!(
+    assert!(!approx_eq!(
         f32,
         student.average_skill_level,
         2.0,
@@ -193,14 +216,13 @@ fn test_sort_by_skill_level_best_green() {
 }
 
 #[test]
-#[should_panic]
 fn test_sort_by_skill_level_best_red() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
 
     tb.calculate_teams_skill_level();
     tb.sort_teams_by_skill_level(None);
 
-    assert_eq!(tb.students.last().unwrap().surname, "Pomettini");
+    assert_ne!(tb.students.last().unwrap().surname, "Pomettini");
 }
 
 #[test]
@@ -214,14 +236,13 @@ fn test_sort_by_skill_level_worst_green() {
 }
 
 #[test]
-#[should_panic]
 fn test_sort_by_skill_level_worst_red() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
 
     tb.calculate_teams_skill_level();
     tb.sort_teams_by_skill_level(None);
 
-    assert_eq!(tb.students.first().unwrap().surname, "Pomettini");
+    assert_ne!(tb.students.first().unwrap().surname, "Pomettini");
 }
 
 #[test]
@@ -235,7 +256,6 @@ fn test_sort_by_skill_best_green() {
 }
 
 #[test]
-#[should_panic]
 fn test_sort_by_specific_skill_best_red() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
 
@@ -243,7 +263,7 @@ fn test_sort_by_specific_skill_best_red() {
     // Programming
     tb.sort_teams_by_skill_level(Some(SKILL_PROGRAMMING));
 
-    assert_eq!(tb.students.last().unwrap().surname, "De Dominicis");
+    assert_ne!(tb.students.last().unwrap().surname, "De Dominicis");
 }
 
 #[test]
@@ -257,14 +277,13 @@ fn test_sort_by_specific_skill_worst_green() {
 }
 
 #[test]
-#[should_panic]
 fn test_sort_by_specific_skill_worst_red() {
     SETUP_TEAMBUILDER_TEST_AND_INIT!(TEST_FILE_EVEN, path, tb);
 
     tb.calculate_teams_skill_level();
     tb.sort_teams_by_skill_level(Some(SKILL_PROGRAMMING));
 
-    assert_eq!(tb.students.first().unwrap().surname, "Pomettini");
+    assert_ne!(tb.students.first().unwrap().surname, "Pomettini");
 }
 
 #[test]

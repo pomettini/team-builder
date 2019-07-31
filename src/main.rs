@@ -1,4 +1,4 @@
-#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
+// #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 
 extern crate csv;
 extern crate itertools;
@@ -20,11 +20,10 @@ use builder::*;
 use std::path::Path;
 use ui::*;
 
-fn main() {
-    let path = Path::new("resources/students.csv");
-    let mut tb = TeamBuilder::load_file(path).expect("File not found");
-    tb.process_file().expect("Cannot process file");
-    tb.calculate_teams_skill_level();
+use std::cell::RefCell;
+use std::rc::Rc;
 
-    init_ui(&mut tb);
+fn main() {
+    let tb = Rc::new(RefCell::new(TeamBuilder::new()));
+    init_ui(&tb);
 }

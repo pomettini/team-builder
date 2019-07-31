@@ -1,5 +1,3 @@
-#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
-
 use crate::builder::*;
 
 const HTML_HEADER: &str = "<!DOCTYPE html>

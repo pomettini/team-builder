@@ -1,5 +1,3 @@
-#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
-
 use crate::builder::*;
 use crate::html_exporter::*;
 
@@ -19,12 +17,12 @@ struct State {
     sort_by: Option<usize>,
 }
 
-pub fn init_ui(tb: &mut TeamBuilder) {
+pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
     // Wrapped with Interior Mutability Pattern
     // Because I need to pass the state around between UI controls
     let state = Rc::new(RefCell::new(State {
         teams: Vec::new(),
-        skills: tb.skills.clone(),
+        skills: tb.borrow().skills.clone(),
         sort_by: None,
     }));
 
@@ -65,10 +63,54 @@ pub fn init_ui(tb: &mut TeamBuilder) {
         students_group_vbox.append(&ui, students_group_hbox, LayoutStrategy::Stretchy);
     }
 
+    let mut load_file_button = Button::new(&ui, "Load CSV file");
+
+    load_file_button.on_clicked(&ui, {
+        let ui = ui.clone();
+        let window = window.clone();
+        let tb = tb.clone();
+        move |button| {
+            let file_path = match window.open_file(&ui) {
+                Some(path) => path,
+                None => {
+                    window.modal_msg(&ui, "Warning", "Please select a file");
+                    return;
+                }
+            };
+
+            match tb.borrow_mut().load_file(&file_path) {
+                Ok(_) => (),
+                Err(_) => {
+                    window.modal_msg(&ui, "Warning", "Please enter a valid file");
+                    return;
+                }
+            };
+
+            match tb.borrow_mut().process_file() {
+                Ok(_) => (),
+                Err(_) => {
+                    window.modal_msg(&ui, "Warning", "Please enter a valid CSV file");
+                    return;
+                }
+            }
+
+            tb.borrow_mut().calculate_teams_skill_level();
+
+            button.set_text(
+                &ui,
+                &format!(
+                    "Loaded {} - Load another CSV file",
+                    // TODO: Needs refactor
+                    &file_path.file_name().unwrap().to_str().unwrap()
+                ),
+            );
+        }
+    });
+
     // Updates the number of teams based on slider's value
     team_number_slider.on_changed(&ui, {
         let ui = ui.clone();
-        let mut team_number_label = team_number_label.clone();
+        let mut team_number_label = team_number_label;
         move |val| {
             team_number_label.set_text(&ui, &format!("Team members: {}", val));
         }
@@ -78,23 +120,26 @@ pub fn init_ui(tb: &mut TeamBuilder) {
 
     generate_button.on_clicked(&ui, {
         let ui = ui.clone();
-        let team_number_slider = team_number_slider.clone();
+        let team_number_slider = team_number_slider;
         let state = state.clone();
+        let tb = tb.clone();
         move |_| {
             // Do stuff with teams data
-            tb.sort_teams_by_skill_level(state.borrow().sort_by);
-            tb.assign_students_to_team(team_number_slider.value(&ui) as usize);
+            tb.borrow_mut()
+                .sort_teams_by_skill_level(state.borrow().sort_by);
+            tb.borrow_mut()
+                .assign_students_to_team(team_number_slider.value(&ui) as usize);
 
             // Cleans the value of every label
             for label in students_labels.iter_mut() {
                 label.set_text(&ui, "");
             }
 
-            state.borrow_mut().teams = tb.teams.clone();
+            state.borrow_mut().teams = tb.borrow().teams.clone();
 
             // Assigns the teams on each label
             let mut counter = 0;
-            for team in tb.teams.iter().map(|team| &team.students) {
+            for team in tb.borrow().teams.iter().map(|team| &team.students) {
                 let surnames: Vec<String> = team
                     .iter()
                     .map(|student| {
@@ -114,7 +159,7 @@ pub fn init_ui(tb: &mut TeamBuilder) {
         }
     });
 
-    selectors_hbox.append(&ui, generate_button, LayoutStrategy::Stretchy);
+    program_vbox.append(&ui, load_file_button, LayoutStrategy::Stretchy);
     program_vbox.append(&ui, selectors_hbox, LayoutStrategy::Compact);
 
     let sort_by_skill_cb = Combobox::new(&ui);
@@ -141,12 +186,10 @@ pub fn init_ui(tb: &mut TeamBuilder) {
         }
     });
 
+    program_vbox.append(&ui, generate_button, LayoutStrategy::Compact);
     program_vbox.append(&ui, sort_by_skill_cb, LayoutStrategy::Compact);
-
     program_vbox.append(&ui, HorizontalSeparator::new(&ui), LayoutStrategy::Compact);
-
     program_vbox.append(&ui, students_group_vbox, LayoutStrategy::Compact);
-
     program_vbox.append(&ui, HorizontalSeparator::new(&ui), LayoutStrategy::Compact);
 
     let mut exporters_hbox = HorizontalBox::new(&ui);

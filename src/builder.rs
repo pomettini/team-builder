@@ -1,5 +1,3 @@
-#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
-
 use csv::ReaderBuilder;
 use std::fs::*;
 use std::path::Path;
@@ -46,24 +44,28 @@ pub struct TeamBuilder {
 }
 
 impl TeamBuilder {
-    pub fn load_file(path: &Path) -> Result<Self, ()> {
+    pub fn new() -> Self {
+        Self {
+            teams: Vec::new(),
+            skills: Vec::new(),
+            students: Vec::new(),
+            students_file: String::new(),
+        }
+    }
+
+    pub fn load_file(&mut self, path: &Path) -> Result<(), ()> {
         let file_contents = read_to_string(&path);
 
         match file_contents {
             Ok(contents) => {
-                let result = Self {
-                    teams: Vec::new(),
-                    skills: Vec::new(),
-                    students: Vec::new(),
-                    students_file: contents,
-                };
-                Ok(result)
+                self.students_file = contents;
+                Ok(())
             }
             Err(_) => Err(()),
         }
     }
 
-    pub fn process_file(&mut self) -> Result<(), ()> {
+    pub fn process_file(&mut self) -> Result<(), &str> {
         let mut students: Vec<Student> = Vec::new();
 
         let mut reader = ReaderBuilder::new()
