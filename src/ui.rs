@@ -22,7 +22,7 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
     // Because I need to pass the state around between UI controls
     let state = Rc::new(RefCell::new(State {
         teams: Vec::new(),
-        skills: tb.borrow().skills.clone(),
+        skills: Vec::new(),
         sort_by: None,
     }));
 
@@ -45,6 +45,10 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
 
     let mut students_group_vbox = VerticalBox::new(&ui);
     students_group_vbox.set_padded(&ui, true);
+
+    let mut sort_by_skill_cb = Combobox::new(&ui);
+    sort_by_skill_cb.append(&ui, "Sort by Average");
+    sort_by_skill_cb.set_selected(&ui, 0);
 
     // FIXME: Must refactor
     // Creates two columns and five rows for the teams
@@ -69,6 +73,8 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
         let ui = ui.clone();
         let window = window.clone();
         let tb = tb.clone();
+        let state = state.clone();
+        let mut sort_by_skill_cb = sort_by_skill_cb.clone();
         move |button| {
             let file_path = match window.open_file(&ui) {
                 Some(path) => path,
@@ -92,6 +98,19 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
                     window.modal_msg(&ui, "Warning", "Please enter a valid CSV file");
                     return;
                 }
+            }
+
+            // sort_by_skill_cb.append(&ui, "Sort by Average");
+            // sort_by_skill_cb.set_selected(&ui, 0);
+
+            // TODO: Bug, appends skills without resetting them
+
+            // Add skills from file to the global state
+            state.borrow_mut().skills = tb.borrow().skills.clone();
+
+            // Add each skill to the ComboBox
+            for skill in &tb.borrow().skills {
+                sort_by_skill_cb.append(&ui, &format!("Sort by {}", skill));
             }
 
             tb.borrow_mut().calculate_teams_skill_level();
@@ -120,10 +139,16 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
 
     generate_button.on_clicked(&ui, {
         let ui = ui.clone();
+        let window = window.clone();
         let team_number_slider = team_number_slider;
         let state = state.clone();
         let tb = tb.clone();
         move |_| {
+            if tb.borrow().students.is_empty() {
+                window.modal_msg(&ui, "Warning", "Please load a CSV file first");
+                return;
+            }
+
             // Do stuff with teams data
             tb.borrow_mut()
                 .sort_teams_by_skill_level(state.borrow().sort_by);
@@ -162,18 +187,7 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
     program_vbox.append(&ui, load_file_button, LayoutStrategy::Stretchy);
     program_vbox.append(&ui, selectors_hbox, LayoutStrategy::Compact);
 
-    let sort_by_skill_cb = Combobox::new(&ui);
-    sort_by_skill_cb.append(&ui, "Sort by Average");
-
-    // Add each skill to the ComboBox
-    for skill in &state.borrow().skills {
-        sort_by_skill_cb
-            .clone()
-            .append(&ui, &format!("Sort by {}", skill));
-    }
-
     // Updates the value of the sorting variable
-    sort_by_skill_cb.clone().set_selected(&ui, 0);
     sort_by_skill_cb.clone().on_selected(&ui, {
         let state = state.clone();
         move |index| {
@@ -216,12 +230,16 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
                 }
             };
 
-            let html_output = generate_html(&state.borrow().teams).unwrap();
+            let html_output = generate_html(&state.borrow().teams).expect("Cannot generate HTML");
 
-            let mut file = File::create(&save_file_path).unwrap();
-            file.write_all(html_output.as_bytes()).unwrap();
+            let mut file = File::create(&save_file_path).expect("Cannot create file");
+            file.write_all(html_output.as_bytes())
+                .expect("Cannot write to file");
 
-            Command::new("open").arg(save_file_path).output().unwrap();
+            Command::new("open")
+                .arg(save_file_path)
+                .output()
+                .expect("Cannot run open command");
         }
     });
     exporters_hbox.append(&ui, generate_html_table_button, LayoutStrategy::Stretchy);

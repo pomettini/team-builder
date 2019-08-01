@@ -20,19 +20,19 @@ pub struct Team {
 #[derive(Default, Debug, PartialEq, Clone)]
 pub struct Student {
     pub surname: String,
-    pub skill_levels: Vec<u8>,
+    pub skill_levels: Vec<u32>,
     pub average_skill_level: f32,
 }
 
 impl Student {
     pub fn get_average_skills(&self) -> f32 {
-        let mut sum: u8 = 0;
+        let mut sum: u32 = 0;
 
         for skill in &self.skill_levels {
             sum += skill;
         }
 
-        f32::from(sum) / self.skill_levels.len() as f32
+        sum as f32 / self.skill_levels.len() as f32
     }
 }
 
@@ -67,6 +67,10 @@ impl TeamBuilder {
     }
 
     pub fn process_file(&mut self) -> Result<(), io::Error> {
+        // Reset values first
+        self.teams = Vec::new();
+        self.skills = Vec::new();
+
         let mut students: Vec<Student> = Vec::new();
 
         let mut reader = ReaderBuilder::new()
@@ -84,9 +88,11 @@ impl TeamBuilder {
             student.surname = record[0].to_string();
 
             for index in 0..self.skills.len() {
-                student
-                    .skill_levels
-                    .push(record[index + 1].parse::<u8>().expect("Cannot push record"));
+                student.skill_levels.push(
+                    record[index + 1]
+                        .parse::<u32>()
+                        .expect("Cannot push record"),
+                );
             }
 
             students.push(student);
