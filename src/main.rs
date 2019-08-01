@@ -23,6 +23,11 @@ use ui::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+// TODO: Add more teams
+// TODO: Warn user when teams would overflow
+// TODO: Update students values based on their skill
+// TODO: Rename students to a neutral definition like elements
+
 fn main() {
     let tb = Rc::new(RefCell::new(TeamBuilder::new()));
     init_ui(&tb);
