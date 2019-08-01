@@ -1,5 +1,6 @@
 use csv::ReaderBuilder;
 use std::fs::*;
+use std::io;
 use std::path::Path;
 
 enum Direction {
@@ -65,19 +66,19 @@ impl TeamBuilder {
         }
     }
 
-    pub fn process_file(&mut self) -> Result<(), &str> {
+    pub fn process_file(&mut self) -> Result<(), io::Error> {
         let mut students: Vec<Student> = Vec::new();
 
         let mut reader = ReaderBuilder::new()
             .delimiter(b';')
             .from_reader(self.students_file.as_bytes());
 
-        for skill in reader.headers().unwrap().iter().skip(1) {
+        for skill in reader.headers()?.iter().skip(1) {
             self.skills.push(skill.to_string());
         }
 
         for record in reader.records() {
-            let record = record.unwrap();
+            let record = record.expect("Cannot process file");
             let mut student: Student = Student::default();
 
             student.surname = record[0].to_string();
@@ -85,7 +86,7 @@ impl TeamBuilder {
             for index in 0..self.skills.len() {
                 student
                     .skill_levels
-                    .push(record[index + 1].parse::<u8>().unwrap());
+                    .push(record[index + 1].parse::<u8>().expect("Cannot push record"));
             }
 
             students.push(student);
@@ -120,21 +121,23 @@ impl TeamBuilder {
                 self.students.sort_by(|a, b| {
                     a.average_skill_level
                         .partial_cmp(&b.average_skill_level)
-                        .unwrap()
+                        .expect("Cannot compare students by average skill level")
                 });
             }
             Some(skill) => {
                 self.students.sort_by(|a, b| {
                     a.skill_levels[skill]
                         .partial_cmp(&b.skill_levels[skill])
-                        .unwrap()
+                        .expect("Cannot compare students by average skill level")
                 });
             }
         }
     }
 
     pub fn assign_students_to_team(&mut self, students_per_team: usize) {
-        let number_of_teams = self.check_number_of_teams(students_per_team).unwrap();
+        let number_of_teams = self
+            .check_number_of_teams(students_per_team)
+            .expect("Cannot calculate number of students per team");
         let mut teams: Vec<Team> = Vec::new();
         let mut students = self.students.clone();
 
