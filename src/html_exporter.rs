@@ -42,8 +42,8 @@ pub fn generate_html(teams: &[Team]) -> Option<String> {
     // TODO: Remove hardcoded team name
     html.push_str(&format!("<th>{}</th>", "Team name"));
 
-    for student in &team.students {
-      html.push_str(&format!("<td>{}</td>", &student.surname));
+    for person in &team.people {
+      html.push_str(&format!("<td>{}</td>", &person.surname));
     }
 
     html.push_str("</tr>");

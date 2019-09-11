@@ -14,17 +14,17 @@ pub static TEAM_NAMES: [&str; 10] = [
 
 #[derive(Default, Debug, Clone)]
 pub struct Team {
-    pub students: Vec<Student>,
+    pub people: Vec<Person>,
 }
 
 #[derive(Default, Debug, PartialEq, Clone)]
-pub struct Student {
+pub struct Person {
     pub surname: String,
     pub skill_levels: Vec<u32>,
     pub average_skill_level: f32,
 }
 
-impl Student {
+impl Person {
     pub fn get_average_skills(&self) -> f32 {
         let mut sum: u32 = 0;
 
@@ -40,8 +40,8 @@ impl Student {
 pub struct TeamBuilder {
     pub teams: Vec<Team>,
     pub skills: Vec<String>,
-    pub students: Vec<Student>,
-    pub students_file: String,
+    pub people: Vec<Person>,
+    pub people_file: String,
 }
 
 impl TeamBuilder {
@@ -49,8 +49,8 @@ impl TeamBuilder {
         Self {
             teams: Vec::new(),
             skills: Vec::new(),
-            students: Vec::new(),
-            students_file: String::new(),
+            people: Vec::new(),
+            people_file: String::new(),
         }
     }
 
@@ -59,7 +59,7 @@ impl TeamBuilder {
 
         match file_contents {
             Ok(contents) => {
-                self.students_file = contents;
+                self.people_file = contents;
                 Ok(())
             }
             Err(_) => Err(()),
@@ -71,11 +71,11 @@ impl TeamBuilder {
         self.teams = Vec::new();
         self.skills = Vec::new();
 
-        let mut students: Vec<Student> = Vec::new();
+        let mut people: Vec<Person> = Vec::new();
 
         let mut reader = ReaderBuilder::new()
             .delimiter(b';')
-            .from_reader(self.students_file.as_bytes());
+            .from_reader(self.people_file.as_bytes());
 
         for skill in reader.headers()?.iter().skip(1) {
             self.skills.push(skill.to_string());
@@ -83,40 +83,40 @@ impl TeamBuilder {
 
         for record in reader.records() {
             let record = record.expect("Cannot process file");
-            let mut student: Student = Student::default();
+            let mut person: Person = Person::default();
 
-            student.surname = record[0].to_string();
+            person.surname = record[0].to_string();
 
             for index in 0..self.skills.len() {
-                student.skill_levels.push(
+                person.skill_levels.push(
                     record[index + 1]
                         .parse::<u32>()
                         .expect("Cannot push record"),
                 );
             }
 
-            students.push(student);
+            people.push(person);
         }
 
-        self.students = students;
+        self.people = people;
 
         Ok(())
     }
 
-    pub fn check_number_of_teams(&self, students_per_team: usize) -> Option<(usize, usize)> {
-        if students_per_team >= self.students.len() {
+    pub fn check_number_of_teams(&self, people_per_team: usize) -> Option<(usize, usize)> {
+        if people_per_team >= self.people.len() {
             return None;
         }
 
-        let quotient = self.students.len() / students_per_team;
-        let remainder = self.students.len() % students_per_team;
+        let quotient = self.people.len() / people_per_team;
+        let remainder = self.people.len() % people_per_team;
 
         Some((quotient, remainder))
     }
 
     pub fn calculate_teams_skill_level(&mut self) {
-        for student in &mut self.students {
-            student.average_skill_level = student.get_average_skills();
+        for person in &mut self.people {
+            person.average_skill_level = person.get_average_skills();
         }
     }
 
@@ -124,28 +124,28 @@ impl TeamBuilder {
         // Order from lowest to greatest
         match sort_by {
             None => {
-                self.students.sort_by(|a, b| {
+                self.people.sort_by(|a, b| {
                     a.average_skill_level
                         .partial_cmp(&b.average_skill_level)
-                        .expect("Cannot compare students by average skill level")
+                        .expect("Cannot compare people by average skill level")
                 });
             }
             Some(skill) => {
-                self.students.sort_by(|a, b| {
+                self.people.sort_by(|a, b| {
                     a.skill_levels[skill]
                         .partial_cmp(&b.skill_levels[skill])
-                        .expect("Cannot compare students by average skill level")
+                        .expect("Cannot compare people by average skill level")
                 });
             }
         }
     }
 
-    pub fn assign_students_to_team(&mut self, students_per_team: usize) {
+    pub fn assign_people_to_team(&mut self, people_per_team: usize) {
         let number_of_teams = self
-            .check_number_of_teams(students_per_team)
-            .expect("Cannot calculate number of students per team");
+            .check_number_of_teams(people_per_team)
+            .expect("Cannot calculate number of people per team");
         let mut teams: Vec<Team> = Vec::new();
-        let mut students = self.students.clone();
+        let mut people = self.people.clone();
 
         for _ in 0..number_of_teams.0 {
             teams.push(Team::default());
@@ -154,13 +154,13 @@ impl TeamBuilder {
         let mut direction = Direction::Forward;
         let mut team_index = 0;
 
-        while !students.is_empty() {
-            let student = match students.pop() {
-                Some(student) => student,
+        while !people.is_empty() {
+            let person = match people.pop() {
+                Some(person) => person,
                 None => break,
             };
 
-            teams[team_index].students.push(student);
+            teams[team_index].people.push(person);
 
             // FIXME: Needs refactor
             match direction {

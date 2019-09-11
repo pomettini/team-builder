@@ -41,10 +41,10 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
     selectors_hbox.append(&ui, team_number_label.clone(), LayoutStrategy::Compact);
     selectors_hbox.append(&ui, team_number_slider.clone(), LayoutStrategy::Stretchy);
 
-    let mut students_labels: Vec<Label> = Vec::new();
+    let mut people_labels: Vec<Label> = Vec::new();
 
-    let mut students_group_vbox = VerticalBox::new(&ui);
-    students_group_vbox.set_padded(&ui, true);
+    let mut people_group_vbox = VerticalBox::new(&ui);
+    people_group_vbox.set_padded(&ui, true);
 
     let mut sort_by_skill_cb = Combobox::new(&ui);
     sort_by_skill_cb.append(&ui, "Sort by Average");
@@ -54,17 +54,17 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
     // Creates two columns and five rows for the teams
     let mut counter = 0;
     for _ in 0..5 {
-        let mut students_group_hbox = HorizontalBox::new(&ui);
-        students_group_hbox.set_padded(&ui, true);
+        let mut people_group_hbox = HorizontalBox::new(&ui);
+        people_group_hbox.set_padded(&ui, true);
         for _ in 0..2 {
             let mut group = Group::new(&ui, &format!("Team {}", TEAM_NAMES[counter]));
             let label = Label::new(&ui, "");
-            students_labels.push(label.clone());
+            people_labels.push(label.clone());
             group.set_child(&ui, label);
-            students_group_hbox.append(&ui, group, LayoutStrategy::Stretchy);
+            people_group_hbox.append(&ui, group, LayoutStrategy::Stretchy);
             counter += 1;
         }
-        students_group_vbox.append(&ui, students_group_hbox, LayoutStrategy::Stretchy);
+        people_group_vbox.append(&ui, people_group_hbox, LayoutStrategy::Stretchy);
     }
 
     let mut load_file_button = Button::new(&ui, "Load CSV file");
@@ -74,7 +74,7 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
         let window = window.clone();
         let tb = tb.clone();
         let state = state.clone();
-        let mut sort_by_skill_cb = sort_by_skill_cb.clone();
+        let sort_by_skill_cb = sort_by_skill_cb.clone();
         move |button| {
             let file_path = match window.open_file(&ui) {
                 Some(path) => path,
@@ -144,7 +144,7 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
         let state = state.clone();
         let tb = tb.clone();
         move |_| {
-            if tb.borrow().students.is_empty() {
+            if tb.borrow().people.is_empty() {
                 window.modal_msg(&ui, "Warning", "Please load a CSV file first");
                 return;
             }
@@ -153,10 +153,10 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
             tb.borrow_mut()
                 .sort_teams_by_skill_level(state.borrow().sort_by);
             tb.borrow_mut()
-                .assign_students_to_team(team_number_slider.value(&ui) as usize);
+                .assign_people_to_team(team_number_slider.value(&ui) as usize);
 
             // Cleans the value of every label
-            for label in students_labels.iter_mut() {
+            for label in people_labels.iter_mut() {
                 label.set_text(&ui, "");
             }
 
@@ -164,20 +164,20 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
 
             // Assigns the teams on each label
             let mut counter = 0;
-            for team in tb.borrow().teams.iter().map(|team| &team.students) {
+            for team in tb.borrow().teams.iter().map(|team| &team.people) {
                 let surnames: Vec<String> = team
                     .iter()
-                    .map(|student| {
+                    .map(|person| {
                         format!(
                             "{} [{:.1}]",
-                            student.surname.clone(),
-                            student.average_skill_level
+                            person.surname.clone(),
+                            person.average_skill_level
                         )
                     })
                     .collect();
 
                 let surname_list = surnames.iter().join(", ");
-                students_labels[counter].set_text(&ui, &surname_list);
+                people_labels[counter].set_text(&ui, &surname_list);
 
                 counter += 1;
             }
@@ -203,7 +203,7 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
     program_vbox.append(&ui, generate_button, LayoutStrategy::Compact);
     program_vbox.append(&ui, sort_by_skill_cb, LayoutStrategy::Compact);
     program_vbox.append(&ui, HorizontalSeparator::new(&ui), LayoutStrategy::Compact);
-    program_vbox.append(&ui, students_group_vbox, LayoutStrategy::Compact);
+    program_vbox.append(&ui, people_group_vbox, LayoutStrategy::Compact);
     program_vbox.append(&ui, HorizontalSeparator::new(&ui), LayoutStrategy::Compact);
 
     let mut exporters_hbox = HorizontalBox::new(&ui);

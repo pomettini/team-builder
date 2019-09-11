@@ -16,8 +16,8 @@ pub fn generate_spreadsheet(teams: &[Team]) {
                 // TODO: Remove hardcoded team name
                 row.add_cell("Team name");
 
-                for student in &team.students {
-                    row.add_cell(student.surname.as_str());
+                for person in &team.people {
+                    row.add_cell(person.surname.as_str());
                 }
 
                 data.append_row(row).unwrap();

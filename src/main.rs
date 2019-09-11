@@ -17,6 +17,7 @@ pub mod ui;
 pub mod tests;
 
 use builder::*;
+#[allow(unused_imports)]
 use std::path::Path;
 use ui::*;
 
@@ -25,8 +26,7 @@ use std::rc::Rc;
 
 // TODO: Add more teams
 // TODO: Warn user when teams would overflow
-// TODO: Update students values based on their skill
-// TODO: Rename students to a neutral definition like elements
+// TODO: Update people values based on their skill
 
 fn main() {
     let tb = Rc::new(RefCell::new(TeamBuilder::new()));
