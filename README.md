@@ -6,17 +6,17 @@
 
 ## How to use it
 
-* Press the **load CSV file** button
-* Use the slider to specify how many people should be in each team
-* Press the **generate** button
+  * Press the **load CSV file** button
+  * Use the slider to specify how many people should be in each team
+  * Press the **generate** button
 
-### The `CSV` file must be formatted in the following way:
+### The `CSV` file must be formatted in the following way
 
-* The first row is for the name of the skills (except the first field)
-* The following rows are for the people's names and their skill levels, represented by an integer
-* Each column must be divided by a semicolon
+  * The first row is for the name of the skills (except the first field)
+  * The following rows are for the people's names and their skill levels, represented by an integer
+  * Each column must be divided by a semicolon
 
-### Example `CSV`: ###
+### Example `CSV`
 
 ```csv
 Name;SkillLevel1;SkillLevel2;SkillLevel3

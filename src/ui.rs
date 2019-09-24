@@ -76,6 +76,11 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
         let state = state.clone();
         let sort_by_skill_cb = sort_by_skill_cb.clone();
         move |button| {
+            // TODO: Due to a bug, you cannot reload the file
+            if !tb.borrow().people_file.is_empty() {
+                return;
+            }
+
             let file_path = match window.open_file(&ui) {
                 Some(path) => path,
                 None => {
@@ -100,9 +105,6 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
                 }
             }
 
-            // sort_by_skill_cb.append(&ui, "Sort by Average");
-            // sort_by_skill_cb.set_selected(&ui, 0);
-
             // TODO: Bug, appends skills without resetting them
 
             // Add skills from file to the global state
@@ -118,7 +120,7 @@ pub fn init_ui(tb: &Rc<RefCell<TeamBuilder>>) {
             button.set_text(
                 &ui,
                 &format!(
-                    "Loaded {} - Load another CSV file",
+                    "Loaded {}",
                     // TODO: Needs refactor
                     &file_path.file_name().unwrap().to_str().unwrap()
                 ),
